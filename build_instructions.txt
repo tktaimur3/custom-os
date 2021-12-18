@@ -1,0 +1,8 @@
+Build the bootloader:
+sudo nasm -felf boot.asm -o boot.o
+
+Build the kernel
+sudo x86_64-elf-gcc -ffreestanding -mno-red-zone -nostdlib -m32 -c main.c -o kernel.o
+
+Link the bootloader and kernel together
+sudo x86_64-elf-ld -melf_i386 -T linker.ld
