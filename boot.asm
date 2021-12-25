@@ -3,12 +3,6 @@ section .boot
 global boot
 
 boot:
-    mov ax, 0x2401
-    int 0x15
-
-    mov ax, 0x3
-    int 0x10
-
     mov [disk], dl
 
     ;Set up boot sector to use more than 512 bytes
@@ -17,10 +11,14 @@ boot:
     mov al, 32      ; loading 32 sectors (512 bytes)
     mov ch, 0       ; HDD specific
     mov dh, 0       ; HDD specific
-    mov cl, 2       ;  (the one after this first 512 bytes)
+    mov cl, 2       
     mov dl, [disk] 
     mov bx, target ; pointer to what we're loading into RAM
     int 0x13
+
+    ; in al, 0x92
+    ; or al, 2
+    ; out 0x92, al
 
     cli
 

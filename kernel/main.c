@@ -1,12 +1,15 @@
-#include "print.h"
-
-char* hello = "Hello world!";
-
-// Add in support for ports (inline assembly stuff)
-// From here: http://www.osdever.net/tutorials/view/mixing-assembly-c
+#include "screen.h"
+#include "keyboard.h"
+#include "typedefs.h"
+#include "idt.h"
+#include "ports.h"
 
 void kmain()
 {
-    set_background();
-    print(hello);
+    init_idt();
+
+    asm volatile ("sti");
+
+    clear_screen();
+    while(1);
 }

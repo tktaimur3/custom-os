@@ -5,11 +5,14 @@ OBJ = ${C_SOURCES:.c=.o}
 
 all: kernel.bin clean
 
-kernel.bin:	boot.o ${OBJ}
+kernel.bin:	boot.o idt.o ${OBJ}
 	i686-elf-ld -o $@ -nostdlib $^ -T linker.ld -L. -lgcc
 
 boot.o:
 	nasm -felf boot.asm -o boot.o
+
+idt.o:
+	nasm -felf idt.asm -o idt.o
 
 %.o : %.c ${HEADERS}
 	i686-elf-gcc ${INCLUDES} -ffreestanding -c $< -o $@
