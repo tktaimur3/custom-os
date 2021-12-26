@@ -3,7 +3,6 @@
 
 char *convert(unsigned int num, unsigned int base);
 void puts(char *string);
-void putchar(char character);
 int get_cursor();
 void set_cursor(int offset);
 
@@ -77,19 +76,30 @@ void putchar(char character)
     unsigned short* vga = (short*) VIDEO_ADDR;
     int offset = get_cursor();
 
-    // Calculate where to put cursor when newline is there
-    if (character == '\n')
+    switch (character)
     {
-        offset = ((offset/SCREEN_WIDTH)+1)*SCREEN_WIDTH;
-    } // Calculate next tab stop, code from: https://stackoverflow.com/a/13094746
-    else if (character == '\t')
-    {
-        offset = (offset + 8) / 8 * 8;
+        case 0:
+            break;
+        case '\n':
+            offset = ((offset/SCREEN_WIDTH)+1)*SCREEN_WIDTH;
+            break;
+        case '\t':
+            offset = (offset + 8) / 8 * 8;
+            break;
+        case 0x0E:
+            vga[offset--] = BACKGROUND_COLOUR |  0x0;
+            vga[offset] = BACKGROUND_COLOUR |  0x0;
+            break;
+        default:
+            vga[offset++] = BACKGROUND_COLOUR |  character;
+            break;
     }
-    else
-    {
-        vga[offset++] = BACKGROUND_COLOUR |  character;
-    }
+
+    if (offset < 0)
+        offset = 0;
+
+    if (offset > 2000)
+        offset = 1999;
 
     set_cursor(offset);
 }

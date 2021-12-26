@@ -35,5 +35,6 @@ typedef unsigned char *va_list;
 void printf(char *format, ...);
 void clear_screen();
 int strlen(const char *string);
+void putchar(char character);
 
 #endif

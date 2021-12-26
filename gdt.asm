@@ -18,6 +18,22 @@ gdt_data:
     db 11001111b        ; 2nd double word - limit[16:19]/granularity 
     db 0                ; 2nd double word - base[24:31]
 
+gdt_ucode:              ; user code segment (when running things in user mode)
+    dw 0xFFFF           ; 1st double word - limit[0:15]
+    dw 0                ; 1st double word - base[0:15]
+    db 0                ; 2nd double word - base[16:23]
+    db 10011010b        ; 2nd double word - type/priv level/present
+    db 11001111b        ; 2nd double word - limit[16:19]/granularity 
+    db 0                ; 2nd double word - base[24:31]
+
+gdt_udata:              ; user data segment (when running things in user mode)
+    dw 0xFFFF           ; 1st double word - limit[0:15]
+    dw 0                ; 1st double word - base[0:15]
+    db 0                ; 2nd double word - base[16:23]
+    db 10010010b        ; 2nd double word - type/priv level/present
+    db 11001111b        ; 2nd double word - limit[16:19]/granularity 
+    db 0    
+
 gdt_end:
 
 gdt_desc:
