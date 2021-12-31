@@ -1,5 +1,6 @@
 #include "screen.h"
 #include "keyboard.h"
+#include "timer.h"
 #include "typedefs.h"
 #include "idt.h"
 #include "ports.h"

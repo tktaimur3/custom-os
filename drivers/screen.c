@@ -81,10 +81,10 @@ void putchar(char character)
         case 0:
             break;
         case '\n':
-            offset = ((offset/SCREEN_WIDTH)+1)*SCREEN_WIDTH;
+            offset = ((offset/SCREEN_WIDTH)+1)*SCREEN_WIDTH;    // calculate next line
             break;
         case '\t':
-            offset = (offset + 8) / 8 * 8;
+            offset = (offset + 8) / 8 * 8;  // calculate tab stop, from: https://stackoverflow.com/a/13094746
             break;
         case 0x0E:
             vga[offset--] = BACKGROUND_COLOUR |  0x0;

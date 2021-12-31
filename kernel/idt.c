@@ -2,6 +2,7 @@
 #include "ports.h"
 #include "screen.h"
 #include "keyboard.h"
+#include "timer.h"
 
 static void idt_install();
 static void idt_set_gate(uint8 num, uint32 base);
@@ -64,7 +65,7 @@ void init_idt()
     outb(0x21, 0x0);
     outb(0xA1, 0x0); 
 
-    idt_set_gate(32, (uint32)irq0);
+    idt_set_gate(32, (uint32)irq0); // timer IRQ
     idt_set_gate(33, (uint32)irq1); // keyboard IRQ
     idt_set_gate(34, (uint32)irq2);
     idt_set_gate(35, (uint32)irq3);
@@ -82,6 +83,17 @@ void init_idt()
     idt_set_gate(47, (uint32)irq15);
 
     idt_install((uint32)&_idt_ptr);
+
+    // // Set up timer, from https://github.com/cfenollosa/os-tutorial/blob/master/20-interrupts-timer/cpu/timer.c
+    uint32 div = 1193180 / FREQ;
+
+    outb(0x43, 0x36);
+
+    uint8 lowbyte = (uint8) div & 0xFF;
+    uint8 highbyte = (uint8) ((div >> 8) & 0xFF);
+
+    outb(0x40, lowbyte);
+    outb(0x40, highbyte);
 }
 
 static void idt_set_gate(uint8 num, uint32 base_addr)
@@ -100,6 +112,9 @@ void irq_handler(registers_t regs)
     // Check what interrupt handler to call
     switch (regs.int_no)
     {
+        case 32:
+            timer_callback();
+            break;
         case 33:
             scancode = inb(0x60);
             keyboard_callback(scancode);
