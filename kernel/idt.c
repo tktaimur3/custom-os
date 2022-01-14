@@ -8,6 +8,7 @@ static void idt_install();
 static void idt_set_gate(uint8 num, uint32 base);
 
 extern void keyboard_callback(uint8 scancode);
+extern void timer_callback();
 
 idt_entry idt_entries[256]; // the 256 entries that make up our IDT
 idt_ptr _idt_ptr;            // the pointer to our idt
@@ -17,9 +18,8 @@ void init_idt()
     _idt_ptr.limit = sizeof(idt_entry)*256 - 1;
     _idt_ptr.base = (uint32)&idt_entries;
 
-    // from: https://github.com/cfenollosa/os-tutorial
-    // for now, just using the keyboard and timer IRQ, could have gone by with just those in my code
-    // most likely will refactor later to account for that
+    // Much taken from: https://github.com/cfenollosa/os-tutorial
+    // for now, just using the keyboard and timer IRQ
 
     idt_set_gate(0, (uint32)isr0);
     idt_set_gate(1, (uint32)isr1);
@@ -54,14 +54,23 @@ void init_idt()
     idt_set_gate(30, (uint32)isr30);
     idt_set_gate(31, (uint32)isr31);
     
-    outb(0x20, 0x11);
-    outb(0xA0, 0x11);
-    outb(0x21, 0x20);
-    outb(0xA1, 0x28);
-    outb(0x21, 0x04);
+    // Remapping the controller as explained here: https://en.wikibooks.org/wiki/X86_Assembly/Programmable_Interrupt_Controller
+    // Port for commands for PIC1 and PIC2 is 0x20 and 0xA0 respectively
+    // Port for data for PIC1 and PIC2 is 0x21 and 0xA1 respectively
+    
+    outb(0x20, 0x11); // restart PIC1
+    outb(0xA0, 0x11); // restart PIC2
+    
+    outb(0x21, 0x20); // PIC1 now starts at 32 (0x20)
+    outb(0xA1, 0x28); // PIC2 now starts at 40 (0x28)
+    
+    // Rest is cascading stuff I'm not too familiar with :)
+    outb(0x21, 0x04); 
     outb(0xA1, 0x02);
+    
     outb(0x21, 0x01);
     outb(0xA1, 0x01);
+    
     outb(0x21, 0x0);
     outb(0xA1, 0x0); 
 
@@ -84,15 +93,20 @@ void init_idt()
 
     idt_install((uint32)&_idt_ptr);
 
-    // // Set up timer, from https://github.com/cfenollosa/os-tutorial/blob/master/20-interrupts-timer/cpu/timer.c
+    // Set up timer, from https://github.com/cfenollosa/os-tutorial/blob/master/20-interrupts-timer/cpu/timer.c
+    
+    // Programming is explained through https://en.wikibooks.org/wiki/X86_Assembly/Programmable_Interval_Timer
+    // We are using channel 0 of the PIT, accessed through port 0x40
+    // Commands are sent through port 0x43
+    
     uint32 div = 1193180 / FREQ;
 
-    outb(0x43, 0x36);
+    outb(0x43, 0x36); // Tell PIT we're setting channel 0
 
     uint8 lowbyte = (uint8) div & 0xFF;
     uint8 highbyte = (uint8) ((div >> 8) & 0xFF);
-
-    outb(0x40, lowbyte);
+    
+    outb(0x40, lowbyte); // Send commands for low and high bytes of frequency
     outb(0x40, highbyte);
 }
 
