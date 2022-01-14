@@ -8,7 +8,7 @@ boot:
     ; load more than 512 bytes into memory
 
     mov ah, 0x2
-    mov al, 32      ; loading 32 sectors (512 bytes)
+    mov al, 32      ; loading 32 sectors (512 bytes each)
     mov ch, 0       ; HDD specific
     mov dh, 0       ; HDD specific
     mov cl, 2       
