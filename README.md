@@ -13,7 +13,11 @@ So far some things that have been added are as follows:
 - Handled keyboard scancodes to output correct keystrokes
 - Implemented basic timing functions
 
-Credit to the following resources (also linked in places throughout the code):
+To build this you would need to download the i686 cross compiler. In addition you would need to edit some things in the Makefile very slightly as it has been tailored for my system. All you need in the end is the bootloader.flp file, which can be run on Bochs or QEMU.
+
+Cross-compiler download guide: https://wiki.osdev.org/GCC_Cross-Compiler
+
+Credit to the following resources for their amazing tutorials/documentation (also linked in places throughout the code):
 - https://github.com/cfenollosa/os-tutorial
 - http://www.jamesmolloy.co.uk/tutorial_html/
 - http://www.osdever.net/tutorials/
