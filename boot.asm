@@ -5,7 +5,7 @@ global boot
 boot:
     mov [disk], dl
 
-    ;Set up boot sector to use more than 512 bytes
+    ; load more than 512 bytes into memory
 
     mov ah, 0x2
     mov al, 32      ; loading 32 sectors (512 bytes)
@@ -15,10 +15,6 @@ boot:
     mov dl, [disk] 
     mov bx, target ; pointer to what we're loading into RAM
     int 0x13
-
-    ; in al, 0x92
-    ; or al, 2
-    ; out 0x92, al
 
     cli
 
