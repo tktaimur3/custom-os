@@ -10,7 +10,7 @@ void timer_callback()
 // each tick is 100 ms
 void sleep_ticks(uint64 sleep_ticks)
 {
-    uint64 target = ticks+sleep_ticks;
+    volatile uint64 target = ticks+sleep_ticks;
 
     while (ticks < target);
 }

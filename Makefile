@@ -18,7 +18,5 @@ idt.o:
 	i686-elf-gcc ${INCLUDES} -ffreestanding -c $< -o $@
 
 clean:
-	cat kernel.bin > bootloader.flp
-	rm -fr kernel/*.o drivers/*.o *.o *.bin
-	cp bootloader.flp /mnt/c/Users/Taimur/Documents/OSStuff/bootloader.flp
-	rm bootloader.flp
+	mv kernel.bin /mnt/c/Users/Taimur/Documents/OSStuff/kernel.bin
+	rm -fr kernel/*.o drivers/*.o *.o

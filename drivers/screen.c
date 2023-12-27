@@ -1,5 +1,6 @@
 #include "screen.h"
 #include "ports.h"
+#include "mem.h"
 
 char *convert(unsigned int num, unsigned int base);
 void puts(char *string);
@@ -57,7 +58,7 @@ void printf(char *format, ...)
         }
     } 
 
-    va_end(arg); 
+    va_end(arg);
 } 
 
 void puts(char *string)
@@ -87,8 +88,13 @@ void putchar(char character)
             offset = (offset + 8) / 8 * 8;  // calculate tab stop, from: https://stackoverflow.com/a/13094746
             break;
         case 0x0E:
-            vga[offset--] = BACKGROUND_COLOUR |  0x0;
-            vga[offset] = BACKGROUND_COLOUR |  0x0;
+            if (offset%SCREEN_WIDTH == 0 && (SCREEN_WIDTH - (strlen((char*)&vga[offset-SCREEN_WIDTH])/2)) > 0)
+                offset -= (SCREEN_WIDTH - (strlen((char*)&vga[offset-SCREEN_WIDTH])/2)); // only works if background colour isnt 0 lol
+            else
+            {
+                vga[offset--] = BACKGROUND_COLOUR |  0x0;
+                vga[offset] = BACKGROUND_COLOUR |  0x0;
+            }
             break;
         default:
             vga[offset++] = BACKGROUND_COLOUR |  character;
@@ -98,8 +104,16 @@ void putchar(char character)
     if (offset < 0)
         offset = 0;
 
-    if (offset > 2000)
-        offset = 1999;
+    // scroll down
+    if (offset >= 2000)
+    {
+        offset = SCREEN_WIDTH*(SCREEN_HEIGHT-1);
+        for (int i = 0; i < SCREEN_HEIGHT-1; i++)
+            memcpy((char*)vga+2*(i*SCREEN_WIDTH), (char*)vga+2*((i+1)*SCREEN_WIDTH), SCREEN_WIDTH*2);
+        // clear last row
+        for (int i = offset; i < SCREEN_WIDTH*SCREEN_HEIGHT; i++)
+            vga[i] = BACKGROUND_COLOUR |  0;
+    }
 
     set_cursor(offset);
 }
@@ -151,7 +165,7 @@ void clear_screen()
     int pixels = SCREEN_WIDTH*SCREEN_HEIGHT;
 
 	for (int i = 0; i < pixels; i++)
-		vga[i] = BACKGROUND_COLOUR |  ' ';
+		vga[i] = BACKGROUND_COLOUR | 0;
 
     set_cursor(0);
 }

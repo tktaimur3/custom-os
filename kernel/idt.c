@@ -54,23 +54,26 @@ void init_idt()
     idt_set_gate(30, (uint32)isr30);
     idt_set_gate(31, (uint32)isr31);
     
-    // Remapping the controller as explained here: https://en.wikibooks.org/wiki/X86_Assembly/Programmable_Interrupt_Controller
+    // Remapping the controller as explained here: https://wiki.osdev.org/PIC
     // Port for commands for PIC1 and PIC2 is 0x20 and 0xA0 respectively
     // Port for data for PIC1 and PIC2 is 0x21 and 0xA1 respectively
     
-    outb(0x20, 0x11); // restart PIC1
-    outb(0xA0, 0x11); // restart PIC2
+    outb(0x20, 0x11); // restart PICs and starts init sequence in cascade mode, means the PICs wait for 3 init bytes on their data ports
+    outb(0xA0, 0x11);
     
+    // first byte
     outb(0x21, 0x20); // PIC1 now starts at 32 (0x20)
     outb(0xA1, 0x28); // PIC2 now starts at 40 (0x28)
     
-    // Rest is cascading stuff I'm not too familiar with :)
-    outb(0x21, 0x04); 
-    outb(0xA1, 0x02);
+    // second byte
+    outb(0x21, 0x04); // tell PIC1 there is a PIC at IRQ2 (bit 2)
+    outb(0xA1, 0x02); // tell PIC2 its cascade identity
     
+    // third byte
     outb(0x21, 0x01);
     outb(0xA1, 0x01);
     
+    // this clears interrupt masks (unrelated to the cascading init sequence)
     outb(0x21, 0x0);
     outb(0xA1, 0x0); 
 
@@ -133,8 +136,13 @@ void irq_handler(registers_t regs)
             scancode = inb(0x60);
             keyboard_callback(scancode);
             break;
+        case 46:
+            break;
+        default:
+        break;
     }
 
+    // issue end of interrupt command to both PICs
     outb(0xA0, 0x20);
     outb(0x20, 0x20); 
 }
